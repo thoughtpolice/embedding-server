@@ -105,9 +105,11 @@ async def stop():
 @click.command()
 @click.option("--host", default="127.0.0.1", help="Host address to bind to")
 @click.option("--port", default=5000, help="Port to bind to")
-def main(host, port):
+@click.option("--reload/--no-reload", default=False, help="Enable auto-reload during development")
+def main(host, port, reload):
     config = Config()
     config.bind = [ "{}:{}".format(host, port) ]
+    config.use_reloader = reload
     asyncio.run(serve(app, config))
 
 if __name__ == "__main__":
