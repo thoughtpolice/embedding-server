@@ -114,17 +114,25 @@ as well as the `index` referring to which input this embedding is for.
 
 ## Running the server + HTTPie Demo
 
-You must have **[Nix]** installed for this to work, for now. In the future there
-will be a Docker container you can use.
+You have two options to run the server, in general:
+
+- Use **[Nix]** with `nix run` (hacking, quick ease of use)
+- Docker/podman/OCI runtime (probably everywhere else)
 
 [Nix]: https://nixos.org/nix
 
 ```bash
+docker run --rm -it -p 5000:5000 ghcr.io/thoughtpolice/embedding-server:latest
+# OR
 nix run --tarball-ttl 0 github:thoughtpolice/embedding-server
 ```
 
+Now, you can query the model list, and then encode two independent words with
+one request:
+
 ```bash
-http get http://127.0.0.1:5000/encode input:='["iPhone","Samsung"]' model=all-MiniLM-L6-v2
+http get http://localhost:5000/v1/models
+http get http://localhost:5000/v1/encode input:='["iPhone","Samsung"]' model=all-MiniLM-L6-v2
 ```
 
 ## License
