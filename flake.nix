@@ -25,7 +25,7 @@
     in {
       devShells.default = pkgs.mkShell {
         /* Default shell environment. */
-        packages = [ python ] ++ pythonLibs;
+        packages = [ pkgs.httpie python ] ++ pythonLibs;
       };
 
       apps = rec {
