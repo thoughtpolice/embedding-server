@@ -1,4 +1,4 @@
-# `embedding-server`: stateless sentence embedding server
+# Sentence embeddings over HTTP
 
 > **NB**: This is an experiment but I welcome feedback if it's useful for you!
 
@@ -23,6 +23,9 @@ with more workers &mdash; though, Python will likely always imply some level of
 compute/latency overhead versus a more optimized solution. However, it is easy,
 simple to extend, and simple to understand.
 
+There are probably other various clones and/or copies of this idea; but this one
+is mine.
+
 [sentence-transformers]: https://www.sbert.net/index.html
 [PyTorch]: https://pytorch.org
 [FastAPI]: https://fastapi.tiangolo.com
@@ -35,7 +38,23 @@ with `text-embedding-ada-002`.
 
 [openai-api]: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
 
-### Endpoint: `GET /encode`
+### Endpoint: `GET /v1/models`
+
+The request is a GET request, with no body. The response is a JSON object like
+follows, listing all possible models you can use with the `v1/encode` endpoint:
+
+```json
+{
+  "data": [
+    "all-MiniLM-L6-v2"
+  ],
+  "object": "list"
+}
+```
+
+> **NB**: Currently, `all-MiniLM-L6-v2` **is the only available model**.
+
+### Endpoint: `GET /v1/encode`
 
 The request is a GET request, with a JSON object body, containing two fields:
 
@@ -43,8 +62,8 @@ The request is a GET request, with a JSON object body, containing two fields:
 - `model: string`
 
 The `input` can simply be a list of words or phrases; the `model` is the
-supported text embedding model to use. As of now, **the only valid `model`
-option** is `all-MiniLM-L6-v2`.
+supported text embedding model to use, which must be one of the options returned
+from `v1/models`.
 
 Given a JSON request:
 

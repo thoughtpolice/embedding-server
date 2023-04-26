@@ -20,9 +20,9 @@ model_list = [
     ('all-MiniLM-L6-v2', SentenceTransformer, ('sentence-transformers/all-MiniLM-L6-v2',)),
 ]
 
-## ---------------------------------------------------------------------------------------------------------------------
-
 app = FastAPI()
+
+## ---------------------------------------------------------------------------------------------------------------------
 
 class EmbeddingRequest(BaseModel):
     user: str | None = None
@@ -40,7 +40,7 @@ class EmbeddingResponse(BaseModel):
     object: str
     data: list[EmbeddingObject]
 
-@app.get("/encode")
+@app.get("/v1/encode")
 async def encode(request: EmbeddingRequest) -> EmbeddingResponse:
     m = request.model
     if not m in loaded_models:
@@ -69,6 +69,17 @@ async def encode(request: EmbeddingRequest) -> EmbeddingResponse:
         model=m,
         object="list",
         data=vectors,
+    )
+
+class ModelListResponse(BaseModel):
+    object: str
+    data: list[str]
+
+@app.get("/v1/models")
+async def models() -> ModelListResponse:
+    return ModelListResponse(
+        object="list",
+        data=list(loaded_models.keys()),
     )
 
 ## ---------------------------------------------------------------------------------------------------------------------
