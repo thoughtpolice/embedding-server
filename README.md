@@ -149,8 +149,8 @@ The **[flake.nix](./flake.nix)** file describes the actual Nix packages that are
 exported/built from this repo. In short:
 
 ```bash
-nix build .#embedding-server
-nix build .#docker-image
+nix build '.#embedding-server'
+nix build '.#docker-image'
 ```
 
 [direnv]: https://direnv.net
