@@ -16,7 +16,7 @@
         sentence-transformers
         fastapi
         torch
-        uvicorn
+        hypercorn
       ];
 
       pythonLibsPath = python.pkgs.makePythonPath pythonLibs;

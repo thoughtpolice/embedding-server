@@ -8,7 +8,10 @@
 import time
 import base64
 
-import uvicorn
+import asyncio
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
@@ -96,4 +99,7 @@ async def stop():
 ## ---------------------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    uvicorn.run("embedding-server:app", host="127.0.0.1", port=5000, log_level="info")
+    config = Config()
+    config.bind = ["127.0.0.1:5000"]
+
+    asyncio.run(serve(app, config))

@@ -16,7 +16,7 @@ semantic search, for instance.
 
 Internally this server is written in Python, and uses the
 **[sentence-transformers]** library and (transitively) **[PyTorch]** to compute
-embeddings. The API is served over **[FastAPI]** by way of **[uvicorn]**.
+embeddings. The API is served over **[FastAPI]** by way of **[hypercorn]**.
 
 Because this server is completely stateless, it can be scaled out vertically
 with more workers &mdash; though, Python will likely always imply some level of
@@ -26,10 +26,10 @@ simple to extend, and simple to understand.
 There are probably other various clones and/or copies of this idea; but this one
 is mine.
 
-[sentence-transformers]: https://www.sbert.net/index.html
+[sentence-transformers]: https://www.sbert.net
 [PyTorch]: https://pytorch.org
 [FastAPI]: https://fastapi.tiangolo.com
-[uvicorn]: https://www.uvicorn.org
+[hypercorn]: https://hypercorn.readthedocs.io
 
 ## API endpoints
 
