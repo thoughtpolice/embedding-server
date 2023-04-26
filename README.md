@@ -16,7 +16,8 @@ semantic search, for instance.
 
 Internally this server is written in Python, and uses the
 **[sentence-transformers]** library and (transitively) **[PyTorch]** to compute
-embeddings. The API is served over **[FastAPI]** by way of **[hypercorn]**.
+embeddings. The API is served over **[FastAPI]** by way of **[hypercorn]**. The
+system is packaged and developed with **[Nix]**.
 
 Because this server is completely stateless, it can be scaled out vertically
 with more workers &mdash; though, Python will likely always imply some level of
@@ -30,6 +31,32 @@ is mine.
 [PyTorch]: https://pytorch.org
 [FastAPI]: https://fastapi.tiangolo.com
 [hypercorn]: https://hypercorn.readthedocs.io
+[Nix]: https://nixos.org/nix
+
+## Running the server + HTTPie Demo
+
+You have two options to run the server, in general:
+
+- Use **[Nix]** with `nix run` (hacking, quick ease of use)
+- Docker/podman/OCI runtime (probably everywhere else)
+
+```bash
+docker run --rm -it -p 5000:5000 ghcr.io/thoughtpolice/embedding-server:latest
+# OR
+nix run --tarball-ttl 0 github:thoughtpolice/embedding-server
+```
+
+The server is now bound to port 5000 (the default.)
+
+Now, you can query the model list, and then encode two independent words with
+one request:
+
+```bash
+http get http://localhost:5000/v1/models
+http get http://localhost:5000/v1/encode \
+  model=all-MiniLM-L6-v2 \
+  input:='["iPhone","Samsung"]'
+```
 
 ## API endpoints
 
@@ -112,28 +139,40 @@ though the `object` fields will help the schema evolve in the future. The `data`
 list will have a list of objects, each containing the dimensions of the vector
 as well as the `index` referring to which input this embedding is for.
 
-## Running the server + HTTPie Demo
+## Hacking
 
-You have two options to run the server, in general:
+Install **[direnv]** into your shell of choice, then move into this repository,
+`direnv allow` the `.envrc` file, and you can just run the
+`./embedding-server.py` script directly as you wish.
 
-- Use **[Nix]** with `nix run` (hacking, quick ease of use)
-- Docker/podman/OCI runtime (probably everywhere else)
-
-[Nix]: https://nixos.org/nix
-
-```bash
-docker run --rm -it -p 5000:5000 ghcr.io/thoughtpolice/embedding-server:latest
-# OR
-nix run --tarball-ttl 0 github:thoughtpolice/embedding-server
-```
-
-Now, you can query the model list, and then encode two independent words with
-one request:
+The **[flake.nix](./flake.nix)** file describes the actual Nix packages that are
+exported/built from this repo. In short:
 
 ```bash
-http get http://localhost:5000/v1/models
-http get http://localhost:5000/v1/encode input:='["iPhone","Samsung"]' model=all-MiniLM-L6-v2
+nix build .#embedding-server
+nix build .#docker-image
 ```
+
+[direnv]: https://direnv.net
+
+You need `impure-derivations` enabled in `experimental-features` and,
+practically speaking, Nix 2.15 or later, probably, since that's what I test
+with.
+
+## Notes
+
+This package tries using `impure-derivations` to package model data. This
+feature allows us to write a Nix expression which, in its body, downloads the
+model data from huggingface.co over the network; this data is then "purified"
+with a fixed-output derivation.
+
+This allows us to have a single source of truth &mdash; the
+`embedding-server.py` script itself &mdash; as the source of truth for all model
+data, so we don't have to manually replicate all of the downloads of each model
+inside a `.nix` file. However, we _do_ have to update the `hash` of the
+fixed-output derivation, and it isn't clear if the hugging face libraries can be
+configured to download stable model versions. We may have to use another
+approach, eventually.
 
 ## License
 
