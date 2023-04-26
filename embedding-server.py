@@ -21,6 +21,7 @@ from sentence_transformers import SentenceTransformer
 ## ---------------------------------------------------------------------------------------------------------------------
 
 loaded_models = {}
+all_model_names = []
 model_list = [
     ('all-MiniLM-L6-v2', SentenceTransformer, ('sentence-transformers/all-MiniLM-L6-v2',)),
 ]
@@ -84,7 +85,7 @@ class ModelListResponse(BaseModel):
 async def models() -> ModelListResponse:
     return ModelListResponse(
         object="list",
-        data=list(loaded_models.keys()),
+        data=all_model_names,
     )
 
 ## ---------------------------------------------------------------------------------------------------------------------
@@ -93,6 +94,7 @@ async def models() -> ModelListResponse:
 async def start():
     for (name, ctor, args) in model_list:
         loaded_models[name] = ctor(*args)
+        all_model_names.append(name)
 
 @app.on_event("shutdown")
 async def stop():
