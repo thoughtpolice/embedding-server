@@ -17,6 +17,7 @@
         fastapi
         torch
         hypercorn
+        click
       ];
 
       pythonLibsPath = python.pkgs.makePythonPath pythonLibs;

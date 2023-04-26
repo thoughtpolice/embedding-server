@@ -8,6 +8,8 @@
 import time
 import base64
 
+import click
+
 import asyncio
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
@@ -98,8 +100,13 @@ async def stop():
 
 ## ---------------------------------------------------------------------------------------------------------------------
 
-if __name__ == "__main__":
+@click.command()
+@click.option("--host", default="127.0.0.1", help="Host address to bind to")
+@click.option("--port", default=5000, help="Port to bind to")
+def main(host, port):
     config = Config()
-    config.bind = ["127.0.0.1:5000"]
-
+    config.bind = [ "{}:{}".format(host, port) ]
     asyncio.run(serve(app, config))
+
+if __name__ == "__main__":
+    main()
