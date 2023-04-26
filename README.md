@@ -58,6 +58,10 @@ http get localhost:5000/v1/encode \
   input:='["iPhone","Samsung"]'
 ```
 
+## Prometheus support
+
+Use the `/metrics` endpoint.
+
 ## API endpoints
 
 The API is loosely inspired by the **[OpenAI Embedding API][openai-api]**, used

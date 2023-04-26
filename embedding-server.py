@@ -46,6 +46,8 @@ class EmbeddingResponse(BaseModel):
     object: str
     data: list[EmbeddingObject]
 
+ENCODE_REQUEST_TIME = prometheus_client.Summary("encode_request_processing_seconds", "Time spent processing embedding request")
+
 @app.get("/v1/encode")
 async def encode(request: EmbeddingRequest) -> EmbeddingResponse:
     m = request.model
@@ -61,15 +63,16 @@ async def encode(request: EmbeddingRequest) -> EmbeddingResponse:
         inputs = [request.input]
 
     vectors = []
-    for i, s in enumerate(inputs):
-        # XXX FIXME (aseipp): respect .max_seq_length here!
-        v = loaded_models[m].encode(s, device="cpu")
-        vectors.append(EmbeddingObject(
-            object="embedding",
-            index=i,
-            dims=len(v),
-            embedding=v.tolist()
-        ))
+    with ENCODE_REQUEST_TIME.time():
+        for i, s in enumerate(inputs):
+            # XXX FIXME (aseipp): respect .max_seq_length here!
+            v = loaded_models[m].encode(s, device="cpu")
+            vectors.append(EmbeddingObject(
+                object="embedding",
+                index=i,
+                dims=len(v),
+                embedding=v.tolist()
+            ))
 
     return EmbeddingResponse(
         model=m,
