@@ -52,8 +52,8 @@ Now, you can query the model list, and then encode two independent words with
 one request:
 
 ```bash
-http get http://localhost:5000/v1/models
-http get http://localhost:5000/v1/encode \
+http get localhost:5000/v1/models
+http get localhost:5000/v1/encode \
   model=all-MiniLM-L6-v2 \
   input:='["iPhone","Samsung"]'
 ```
