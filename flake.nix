@@ -18,6 +18,7 @@
         torch
         hypercorn
         click
+        prometheus-client
       ];
 
       pythonLibsPath = python.pkgs.makePythonPath pythonLibs;

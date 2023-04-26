@@ -18,6 +18,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 
+import prometheus_client
+
 ## ---------------------------------------------------------------------------------------------------------------------
 
 loaded_models = {}
@@ -99,6 +101,9 @@ async def stop():
     loaded_models.clear()
 
 ## ---------------------------------------------------------------------------------------------------------------------
+
+prom_app = prometheus_client.make_asgi_app()
+app.mount("/metrics", prom_app)
 
 @click.command()
 @click.option("--host", default="127.0.0.1", help="Host address to bind to")
