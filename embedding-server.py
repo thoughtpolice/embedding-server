@@ -22,9 +22,7 @@ from sentence_transformers import SentenceTransformer
 
 loaded_models = {}
 all_model_names = []
-model_list = [
-    ('all-MiniLM-L6-v2', SentenceTransformer, ('sentence-transformers/all-MiniLM-L6-v2',)),
-]
+all_models_list = []
 
 app = FastAPI()
 
@@ -92,9 +90,9 @@ async def models() -> ModelListResponse:
 
 @app.on_event("startup")
 async def start():
-    for (name, ctor, args) in model_list:
-        loaded_models[name] = ctor(*args)
-        all_model_names.append(name)
+    for (name, display_name, ctor) in all_models_list:
+        loaded_models[display_name] = ctor(name)
+        all_model_names.append(display_name)
 
 @app.on_event("shutdown")
 async def stop():
@@ -106,11 +104,35 @@ async def stop():
 @click.option("--host", default="127.0.0.1", help="Host address to bind to")
 @click.option("--port", default=5000, help="Port to bind to")
 @click.option("--reload/--no-reload", default=False, help="Enable auto-reload during development")
-def main(host, port, reload):
-    config = Config()
-    config.bind = [ "{}:{}".format(host, port) ]
-    config.use_reloader = reload
-    asyncio.run(serve(app, config))
+@click.option("--save-models-to", default=None, help="Save models to this directory, then exit")
+@click.option("--load-models-from", default=None, help="Load models from this directory")
+def main(host, port, reload, save_models_to, load_models_from):
+    global all_models_list
+
+    models = [
+        ('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2', SentenceTransformer)
+    ]
+
+    if save_models_to != None:
+        print("Saving models to '{}' and exiting...\n".format(save_models_to))
+        for (name, display_name, ctor) in models:
+            print("  : {} -> {}/{}".format(display_name, save_models_to, display_name))
+            m = ctor(name)
+            m.save("{}/{}".format(save_models_to, display_name))
+            print()
+    else:
+        if load_models_from == None:
+            print("Loading models from $TRANSFORMERS_CACHE and/or network...")
+            all_models_list = models
+        else:
+            print("Loading models from '{}'...".format(load_models_from))
+            for (name, display_name, ctor) in models:
+                all_models_list.append(('{}/{}'.format(load_models_from, display_name), display_name, ctor))
+
+        config = Config()
+        config.bind = [ "{}:{}".format(host, port) ]
+        config.use_reloader = reload
+        asyncio.run(serve(app, config))
 
 if __name__ == "__main__":
     main()
