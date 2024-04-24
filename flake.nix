@@ -86,19 +86,25 @@
           } ''
             mkdir -p $out tmp
             export HOME=$PWD/tmp
-            export TRANSFORMERS_CACHE=$PWD/tmp
+            export HF_HOME=$PWD/tmp
             export PYTHONPATH="${pythonLibsPath}"
 
-            exec ${python}/bin/python \
+            ${python}/bin/python \
               ${embedding-server-py}/libexec/embedding-server.py \
               --save-models-to $out
+            
+            # FIXME: why doesn't the nomic model include this file?
+            cp -v \
+              $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1/snapshots/02d96723811f4bb77a80857da07eda78c1549a4d/configuration_hf_nomic_bert.py \
+              $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1/snapshots/02d96723811f4bb77a80857da07eda78c1549a4d/modeling_hf_nomic_bert.py \
+              $out/nomic-embed-text-v1
           '';
 
         /* finally, just re-package the data with a fixed-output sha256 hash */
         in pkgs.runCommand "model-data" {
           outputHashMode = "recursive";
           outputHashAlgo = "sha256";
-          outputHash = "sha256-4gvFJmMIKB/HbavU67/BnVz3SY0rrN81L9Cu2MamYM0=";
+          outputHash = "sha256-nMRQtxrJdLxAnNLGHP61nAePGWJ/ZVG6ad0v9wUBTeY=";
           passthru = { inherit real-data; };
         } "mkdir -p $out && cp -r ${real-data}/* $out";
       };
