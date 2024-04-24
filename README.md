@@ -77,13 +77,12 @@ follows, listing all possible models you can use with the `v1/encode` endpoint:
 ```json
 {
   "data": [
-    "all-MiniLM-L6-v2"
+    "all-MiniLM-L6-v2",
+    "nomic-embed-text-v1"
   ],
   "object": "list"
 }
 ```
-
-> **NB**: Currently, `all-MiniLM-L6-v2` **is the only available model**.
 
 ### Endpoint: `GET /v1/encode`
 
