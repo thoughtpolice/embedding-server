@@ -14,6 +14,7 @@ import asyncio
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
@@ -26,7 +27,17 @@ loaded_models = {}
 all_model_names = []
 all_models_list = []
 
-app = FastAPI()
+## ---------------------------------------------------------------------------------------------------------------------
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    for (name, display_name, ctor, kwargs) in all_models_list:
+        loaded_models[display_name] = ctor(name, **kwargs)
+        all_model_names.append(display_name)
+    yield
+    loaded_models.clear()
+
+app = FastAPI(lifespan=lifespan)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 
@@ -90,18 +101,6 @@ async def models() -> ModelListResponse:
         object="list",
         data=all_model_names,
     )
-
-## ---------------------------------------------------------------------------------------------------------------------
-
-@app.on_event("startup")
-async def start():
-    for (name, display_name, ctor, kwargs) in all_models_list:
-        loaded_models[display_name] = ctor(name, **kwargs)
-        all_model_names.append(display_name)
-
-@app.on_event("shutdown")
-async def stop():
-    loaded_models.clear()
 
 ## ---------------------------------------------------------------------------------------------------------------------
 
