@@ -117,9 +117,12 @@ def main(host, port, reload, save_models_to, load_models_from):
     global all_models_list
 
     models = [
-        ('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2', SentenceTransformer, {}),
+        ('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2', SentenceTransformer, {
+            'revision': 'e4ce9877abf3edfe10b0d82785e83bdcb973e22e',
+        }),
         ('nomic-ai/nomic-embed-text-v1', 'nomic-embed-text-v1', SentenceTransformer, {
             'trust_remote_code': True,
+            'revision': '02d96723811f4bb77a80857da07eda78c1549a4d',
         }),
     ]
 
