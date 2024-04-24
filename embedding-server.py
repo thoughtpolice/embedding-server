@@ -118,6 +118,9 @@ def main(host, port, reload, save_models_to, load_models_from):
 
     models = [
         ('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2', SentenceTransformer, {}),
+        ('nomic-ai/nomic-embed-text-v1', 'nomic-embed-text-v1', SentenceTransformer, {
+            'trust_remote_code': True,
+        }),
     ]
 
     if save_models_to != None:

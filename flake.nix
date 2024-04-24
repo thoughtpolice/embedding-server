@@ -19,6 +19,7 @@
         hypercorn
         click
         prometheus-client
+        einops
       ];
 
       pythonLibsPath = python.pkgs.makePythonPath pythonLibs;
@@ -97,7 +98,7 @@
         in pkgs.runCommand "model-data" {
           outputHashMode = "recursive";
           outputHashAlgo = "sha256";
-          outputHash = "sha256-z1ENh35Z2mFUj/gRLt8XKkJ/SxsS9d1G3PXWbpSmMUQ=";
+          outputHash = "sha256-4gvFJmMIKB/HbavU67/BnVz3SY0rrN81L9Cu2MamYM0=";
           passthru = { inherit real-data; };
         } "mkdir -p $out && cp -r ${real-data}/* $out";
       };
