@@ -95,8 +95,8 @@ async def models() -> ModelListResponse:
 
 @app.on_event("startup")
 async def start():
-    for (name, display_name, ctor) in all_models_list:
-        loaded_models[display_name] = ctor(name)
+    for (name, display_name, ctor, kwargs) in all_models_list:
+        loaded_models[display_name] = ctor(name, **kwargs)
         all_model_names.append(display_name)
 
 @app.on_event("shutdown")
@@ -118,14 +118,14 @@ def main(host, port, reload, save_models_to, load_models_from):
     global all_models_list
 
     models = [
-        ('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2', SentenceTransformer)
+        ('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2', SentenceTransformer, {}),
     ]
 
     if save_models_to != None:
         print("Saving models to '{}' and exiting...\n".format(save_models_to))
-        for (name, display_name, ctor) in models:
+        for (name, display_name, ctor, kwargs) in models:
             print("  : {} -> {}/{}".format(display_name, save_models_to, display_name))
-            m = ctor(name)
+            m = ctor(name, **kwargs)
             m.save("{}/{}".format(save_models_to, display_name))
             print()
     else:
@@ -134,8 +134,8 @@ def main(host, port, reload, save_models_to, load_models_from):
             all_models_list = models
         else:
             print("Loading models from '{}'...".format(load_models_from))
-            for (name, display_name, ctor) in models:
-                all_models_list.append(('{}/{}'.format(load_models_from, display_name), display_name, ctor))
+            for (name, display_name, ctor, kwargs) in models:
+                all_models_list.append(('{}/{}'.format(load_models_from, display_name), display_name, ctor, kwargs))
 
         config = Config()
         config.bind = [ "{}:{}".format(host, port) ]
