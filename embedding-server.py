@@ -42,7 +42,6 @@ app = FastAPI(lifespan=lifespan)
 ## ---------------------------------------------------------------------------------------------------------------------
 
 class EmbeddingRequest(BaseModel):
-    user: str | None = None
     model: str
     input: str | list[str]
 
