@@ -53,7 +53,7 @@ one request:
 
 ```bash
 http get localhost:5000/v1/models
-http get localhost:5000/v1/encode \
+http get localhost:5000/v1/embeddings \
   model=all-MiniLM-L6-v2 \
   input:='["iPhone","Samsung"]'
 ```
@@ -72,7 +72,8 @@ with `text-embedding-ada-002`.
 ### Endpoint: `GET /v1/models`
 
 The request is a GET request, with no body. The response is a JSON object like
-follows, listing all possible models you can use with the `v1/encode` endpoint:
+follows, listing all possible models you can use with the `v1/embeddings`
+endpoint:
 
 ```json
 {
@@ -84,7 +85,7 @@ follows, listing all possible models you can use with the `v1/encode` endpoint:
 }
 ```
 
-### Endpoint: `GET /v1/encode`
+### Endpoint: `GET /v1/embeddings`
 
 The request is a GET request, with a JSON object body, containing two fields:
 
