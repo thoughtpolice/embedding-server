@@ -82,6 +82,7 @@
             buildInputs = [
               python
               embedding-server-py
+              pkgs.gron
             ] ++ pythonLibs;
           } ''
             mkdir -p $out tmp
@@ -92,19 +93,25 @@
             ${python}/bin/python \
               ${embedding-server-py}/libexec/embedding-server.py \
               --save-models-to $out
-            
-            # FIXME: why doesn't the nomic model include this file?
+
+            # https://github.com/UKPLab/sentence-transformers/issues/2613
             cp -v \
               $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1/snapshots/02d96723811f4bb77a80857da07eda78c1549a4d/configuration_hf_nomic_bert.py \
               $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1/snapshots/02d96723811f4bb77a80857da07eda78c1549a4d/modeling_hf_nomic_bert.py \
               $out/nomic-embed-text-v1
+
+            gron $out/nomic-embed-text-v1/config.json \
+              | sed -E 's/json\.auto_map\.(.*?)\s=\s".*?\-\-/json\.auto_map\.\1 = "/' \
+              | gron --ungron \
+            > $out/nomic-embed-text-v1/config.json.tmp
+            mv $out/nomic-embed-text-v1/config.json.tmp $out/nomic-embed-text-v1/config.json
           '';
 
         /* finally, just re-package the data with a fixed-output sha256 hash */
         in pkgs.runCommand "model-data" {
           outputHashMode = "recursive";
           outputHashAlgo = "sha256";
-          outputHash = "sha256-nMRQtxrJdLxAnNLGHP61nAePGWJ/ZVG6ad0v9wUBTeY=";
+          outputHash = "sha256-QpmYSk396ShTFyXA9+DWjiGfEuZMSAul9EnOfG6SeRU=";
           passthru = { inherit real-data; };
         } "mkdir -p $out && cp -r ${real-data}/* $out";
       };
