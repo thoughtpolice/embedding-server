@@ -5,8 +5,8 @@
 
 ## ---------------------------------------------------------------------------------------------------------------------
 
-import time
 import base64
+import time
 
 import click
 
@@ -17,6 +17,7 @@ from hypercorn.config import Config
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
 from sentence_transformers import SentenceTransformer
 
 import prometheus_client
@@ -67,22 +68,22 @@ async def embeddings(request: EmbeddingRequest) -> EmbeddingResponse:
             detail="Model '{}' does not exist".format(m),
         )
 
-    if type(request.input) == list:
-        inputs = request.input
-    else:
-        inputs = [request.input]
+    inputs = request.input if type(request.input) == list else [request.input]
+
+    embeddings = []
+    with ENCODE_REQUEST_TIME.time():
+        # XXX FIXME (aseipp): respect .max_seq_length here!
+        v = loaded_models[m].encode(inputs, device="cpu")
+        [ embeddings.append(x) for x in v.tolist() ]
 
     vectors = []
-    with ENCODE_REQUEST_TIME.time():
-        for i, s in enumerate(inputs):
-            # XXX FIXME (aseipp): respect .max_seq_length here!
-            v = loaded_models[m].encode(s, device="cpu")
-            vectors.append(EmbeddingObject(
-                object="embedding",
-                index=i,
-                dims=len(v),
-                embedding=v.tolist()
-            ))
+    for i, s in enumerate(embeddings):
+        vectors.append(EmbeddingObject(
+            object="embedding",
+            index=i,
+            dims=len(s),
+            embedding=s,
+        ))
 
     return EmbeddingResponse(
         model=m,
