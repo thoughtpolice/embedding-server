@@ -86,9 +86,9 @@ endpoint:
 }
 ```
 
-### Endpoint: `GET /v1/embeddings`
+### Endpoint: `POST /v1/embeddings`
 
-The request is a GET request, with a JSON object body, containing two fields:
+The request is a POST request, with a JSON object body, containing two fields:
 
 - `input: list[string]`
 - `model: string`

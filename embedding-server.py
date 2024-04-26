@@ -60,7 +60,7 @@ class EmbeddingResponse(BaseModel):
 
 ENCODE_REQUEST_TIME = prometheus_client.Summary("encode_request_processing_seconds", "Time spent processing embedding request")
 
-@app.get("/v1/embeddings")
+@app.post("/v1/embeddings")
 async def embeddings(request: EmbeddingRequest) -> EmbeddingResponse:
     m = request.model
     if not m in loaded_models:
