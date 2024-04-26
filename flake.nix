@@ -100,18 +100,25 @@
               $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1/snapshots/02d96723811f4bb77a80857da07eda78c1549a4d/modeling_hf_nomic_bert.py \
               $out/nomic-embed-text-v1
 
-            gron $out/nomic-embed-text-v1/config.json \
-              | sed -E 's/json\.auto_map\.(.*?)\s=\s".*?\-\-/json\.auto_map\.\1 = "/' \
-              | gron --ungron \
-            > $out/nomic-embed-text-v1/config.json.tmp
-            mv $out/nomic-embed-text-v1/config.json.tmp $out/nomic-embed-text-v1/config.json
+            cp -v \
+              $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1-unsupervised/snapshots/3916676c856f1e25a4cc7a4e0ac740ea6ca9723a/configuration_hf_nomic_bert.py \
+              $HF_HOME/hub/models--nomic-ai--nomic-embed-text-v1-unsupervised/snapshots/3916676c856f1e25a4cc7a4e0ac740ea6ca9723a/modeling_hf_nomic_bert.py \
+              $out/nomic-embed-text-v1.5
+
+            for model in nomic-embed-text-v1 nomic-embed-text-v1.5; do
+              gron $out/$model/config.json \
+                | sed -E 's/json\.auto_map\.(.*?)\s=\s".*?\-\-/json\.auto_map\.\1 = "/' \
+                | gron --ungron \
+              > $out/$model/config.json.tmp
+              mv $out/$model/config.json.tmp $out/$model/config.json
+            done
           '';
 
         /* finally, just re-package the data with a fixed-output sha256 hash */
         in pkgs.runCommand "model-data" {
           outputHashMode = "recursive";
           outputHashAlgo = "sha256";
-          outputHash = "sha256-QpmYSk396ShTFyXA9+DWjiGfEuZMSAul9EnOfG6SeRU=";
+          outputHash = "sha256-Jnv50X6HR/H+NDpltrGye9nYAXKpxXA2bg6iDyJIpe0=";
           passthru = { inherit real-data; };
         } "mkdir -p $out && cp -r ${real-data}/* $out";
       };

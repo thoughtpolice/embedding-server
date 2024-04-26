@@ -79,7 +79,8 @@ endpoint:
 {
   "data": [
     "all-MiniLM-L6-v2",
-    "nomic-embed-text-v1"
+    "nomic-embed-text-v1",
+    "nomic-embed-text-v1.5"
   ],
   "object": "list"
 }
@@ -142,6 +143,30 @@ This is fairly self explanatory, and effectively the only possible response;
 though the `object` fields will help the schema evolve in the future. The `data`
 list will have a list of objects, each containing the dimensions of the vector
 as well as the `index` referring to which input this embedding is for.
+
+### Note: Matryoshka model support
+
+The server supports "Matryoshka" embeddings, which are embeddings that remain
+valid even when they are truncated to a smaller dimension, i.e. if the server
+responds with a 768-dimensional vector, you can safely drop the last 384 values
+to get a new 384-dimensional vector that is still valid, but with reduced
+accuracy.
+
+This feature allows you to use the same model for different applications that
+require different embeddings, with different size/accuracy tradeoffs. For
+example, search queries may be able to get by with ~10% of the original
+dimensionality (~78 dimensions), while retaining 90% or more accuracy of the
+full-sized vector.
+
+Currently the only supported Matryoshka model is `nomic-embed-text-v1.5`, which
+by default acts identically to the `nomic-embed-text-v1` model; there is no way
+in an API request to ask for a specific vector dimensionality; the caller is
+responsible for truncating the relevant vectors to the desired dimension
+afterwords if they need it.
+
+Note that the Nomic `v1.5` model, at the default dimensionality (784), has
+negligible performance reduction compared to `v1`, so you are free to use `v1.5`
+by default if you are unsure of which you want.
 
 ## Hacking
 

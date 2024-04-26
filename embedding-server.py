@@ -19,6 +19,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from sentence_transformers import SentenceTransformer
+import torch.nn.functional as F
 
 import prometheus_client
 
@@ -68,12 +69,23 @@ async def embeddings(request: EmbeddingRequest) -> EmbeddingResponse:
             detail="Model '{}' does not exist".format(m),
         )
 
+    nomic_matryoshka = False
+    if m in [ "nomic-embed-text-v1.5" ]:
+        nomic_matryoshka = True
+
     inputs = request.input if type(request.input) == list else [request.input]
 
     embeddings = []
     with ENCODE_REQUEST_TIME.time():
         # XXX FIXME (aseipp): respect .max_seq_length here!
-        v = loaded_models[m].encode(inputs, device="cpu")
+        if not nomic_matryoshka:
+            v = loaded_models[m].encode(inputs, device="cpu")
+        else:
+            # nomic matryoshka models use a custom design and require a
+            # layer_norm to be applied after encoding. they may be freely
+            # truncated to the desired dimensionality after this step
+            v = loaded_models[m].encode(inputs, device="cpu", convert_to_tensor=True)
+            v = F.layer_norm(v, normalized_shape=(v.shape[1],))
         [ embeddings.append(x) for x in v.tolist() ]
 
     vectors = []
@@ -124,6 +136,10 @@ def main(host, port, reload, save_models_to, load_models_from):
             'trust_remote_code': True,
             'revision': '02d96723811f4bb77a80857da07eda78c1549a4d',
         }),
+        ('nomic-ai/nomic-embed-text-v1.5', 'nomic-embed-text-v1.5', SentenceTransformer, {
+            'trust_remote_code': True,
+            'revision': '7a5549b77c439ed64573143699547131d4218046',
+        })
     ]
 
     if save_models_to != None:
